@@ -28,6 +28,7 @@ namespace Library.API.Controllers
 		}
 
 		[HttpGet(Name = "GetAuthors")]
+		[HttpHead]
 		public IActionResult GetAuthors(AuthorsResourceParameters authorsResourceParameters, [FromHeader(Name = "Accept")] string mediaType)
 		{
 			if (!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Author>(authorsResourceParameters.OrderBy))
@@ -231,6 +232,13 @@ namespace Library.API.Controllers
 			if (hasPrevious)
 				links.Add(new LinkDto(CreateAuthorsResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage), "previousPage", "GET"));
 			return links;
+		}
+
+		[HttpOptions]
+		public IActionResult GetAuthorsOptions()
+		{
+			Response.Headers.Add("Allow", "GET,OPTIONS,POST");
+			return Ok();
 		}
 	}
 }
