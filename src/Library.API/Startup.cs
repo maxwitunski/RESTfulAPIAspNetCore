@@ -62,6 +62,8 @@ namespace Library.API
 				options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 			});
 
+			services.AddResponseCaching();
+
 			// register the DbContext on the container, getting the connection string from
 			// appSettings (note: use this during development; in a production environment,
 			// it's better to store the connection string in an environment variable)
@@ -80,6 +82,15 @@ namespace Library.API
 
 			services.AddTransient<IPropertyMappingService, PropertyMappingService>();
 			services.AddTransient<ITypeHelperService, TypeHelperService>();
+			services.AddHttpCacheHeaders((expirationModelOptions) =>
+			{
+				expirationModelOptions.MaxAge = 600;
+				expirationModelOptions.SharedMaxAge = 300;
+			}, (validationModelOptions) =>
+			{
+				validationModelOptions.AddMustRevalidate = true;
+				validationModelOptions.AddProxyRevalidate = true;
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -126,6 +137,8 @@ namespace Library.API
 			});
 
 			libraryContext.EnsureSeedDataForContext();
+			app.UseResponseCaching();
+			app.UseHttpCacheHeaders();
 
 			app.UseMvc();
 		}
